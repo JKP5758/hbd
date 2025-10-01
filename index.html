@@ -8,7 +8,7 @@
 </head>
 <body>
     <style>
-.tick {
+.tick A {
   font-size:1rem; white-space:nowrap; font-family:arial,sans-serif;
 }
 
@@ -38,6 +38,12 @@
 
 body {
    background-color: rgb(255, 255, 255) !important; 
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   height: 100vh;
+   flex-direction: column;
+   overflow: hidden; /* Prevent scrollbars during animation */
 }
 
 .tick-text-inline {
@@ -67,8 +73,49 @@ body {
 .tick-flip {
    border-radius:0.12em !important; 
 }
+.message {
+    font-size: 2em;
+    margin-bottom: 1em;
+    font-family: arial, sans-serif;
+    color: rgb(90, 93, 99);
+}
+
+#birthday-image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 100%;
+    width: 150px; /* Set a width for the image */
+    height: 150px; /* Set a height for the image */
+    transition: all 1s ease-in-out;
+    opacity: 0;
+}
+
+#birthday-image.show {
+    opacity: 1;
+}
+
+#birthday-image.move-up {
+    top: 30%;
+}
+
+#birthday-message {
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    font-size: 3em;
+    font-family: arial, sans-serif;
+    color: rgb(90, 93, 99);
+    margin-top: 20px;
+}
+
+#birthday-message.show {
+    opacity: 1;
+}
+
 </style>
 
+<div class="message">😊 Sabar Yaa</div>
 <div class="tick" data-did-init="handleTickInit">
 
     <div data-repeat="true" data-layout="horizontal fit" data-transform="preset(h, m, s) -> delay">
@@ -89,46 +136,52 @@ body {
 
 </div>
 
-<div class="tick-onended-message" style="display:none">
-    <p>Time's up</p>
-</div>
+<img id="birthday-image" src="profil.jpeg" style="display: none;">
+<div id="birthday-message" style="display: none;">Happy Birthday</div>
+
 
 <script>
     function handleTickInit(tick) {
 
-        // Menghapus logika localStorage agar timer selalu reset saat refresh
-        // var offset = new Date( localStorage.getItem('countdown-offset') || new Date() );
-        // localStorage.setItem('countdown-offset', offset);
-
-        // 1. Tentukan durasi 10 detik
-        var timeDuration = Tick.helper.duration(15, 'seconds');
-
-        // 2. Tentukan batas waktu (deadline) baru: Waktu Sekarang + 10 detik
+        var timeDuration = Tick.helper.duration(5, 'seconds');
         var deadline = new Date( new Date().getTime() + timeDuration );
-
-        // 3. Buat penghitung (counter) dengan format Jam, Menit, Detik
         var counter = Tick.count.down(deadline, { format: ['h' ,'m', 's'] } );
 
-        // update tick with the counter value
         counter.onupdate = function(value) {
             tick.value = value;
         };
 
         counter.onended = function() {
-            // redirect, uncomment the next line
-            // window.location = 'my-location.html'
+            tick.root.style.display = 'none';
+            var messageElement = document.querySelector('.message');
+            messageElement.innerHTML = '😊 Aku mau bilan sesuatu nih';
 
-            // hide counter, uncomment the next line
-            // tick.root.style.display = 'none';
+            setTimeout(function() {
+                messageElement.style.display = 'none';
 
-            // show message, uncomment the next line
-            // document.querySelector('.tick-onended-message').style.display = '';
+                var birthdayImage = document.getElementById('birthday-image');
+                var birthdayMessage = document.getElementById('birthday-message');
+
+                birthdayImage.style.display = 'block';
+                
+                setTimeout(function() {
+                    birthdayImage.classList.add('show');
+                    birthdayImage.classList.add('move-up');
+                }, 100);
+
+                setTimeout(function() {
+                    birthdayMessage.style.display = 'block';
+                    setTimeout(function() {
+                        birthdayMessage.classList.add('show');
+                    }, 100);
+                }, 1000); // Delay for the text to appear after the image starts moving
+
+            }, 2000); // 2 second delay
         };
     }
 </script>
 <script src="flip.min.js"></script>
 <script>
-    // Kode untuk menghapus elemen tick-credits
     document.addEventListener('DOMContentLoaded', (event) => {
         const creditElement = document.querySelector('.tick-credits');
         if (creditElement) {
