@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link href="flip.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
     <style>
 .tick A {
-  font-size:1rem; white-space:nowrap; font-family:arial,sans-serif;
+  font-size:1rem; white-space:nowrap;
 }
 
 .tick-flip,.tick-text-inline {
@@ -45,6 +46,7 @@ body {
    height: 100vh;
    flex-direction: column;
    overflow: hidden; /* Prevent scrollbars during animation */
+   font-family: 'Roboto', sans-serif;
 }
 
 .tick-text-inline {
@@ -57,10 +59,6 @@ body {
 
 .tick-flip-panel {
    color: rgb(255, 255, 255) !important; 
-}
-
-.tick-flip {
-   font-family: !important; 
 }
 
 .tick-flip-panel-text-wrapper {
@@ -77,7 +75,6 @@ body {
 .message {
     font-size: 2em;
     margin-bottom: 1em;
-    font-family: arial, sans-serif;
     color: rgb(90, 93, 99);
 }
 
@@ -106,11 +103,10 @@ body {
     opacity: 0;
     transition: opacity 1s ease-in-out;
     font-size: 3em;
-    font-family: arial, sans-serif;
-    color: rgb(90, 93, 99);
     margin-top: 20px;
     position: relative;
     z-index: 1;
+    color: rgb(90, 93, 99);
 }
 
 #birthday-message.show {
@@ -131,6 +127,105 @@ body {
     }
     to {
         transform: translateY(-120vh);
+    }
+}
+
+#letter-button {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 3em;
+    cursor: pointer;
+    animation: float-in 1s ease-in-out forwards, pulse 2s infinite;
+    z-index: 2;
+}
+
+@keyframes float-in {
+    from {
+        bottom: -100px;
+    }
+    to {
+        bottom: 20px;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: translateX(-50%) scale(1);
+    }
+    50% {
+        transform: translateX(-50%) scale(1.1);
+    }
+    100% {
+        transform: translateX(-50%) scale(1);
+    }
+}
+
+#letter-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 500px;
+    background-color: white;
+    padding: 2em;
+    border-radius: 1em;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    display: none;
+    z-index: 3;
+    height: 300px; /* Fixed height */
+}
+
+/* Close button for the modal */
+#close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 2em;
+    cursor: pointer;
+}
+
+/* Styling for the letter content */
+#letter-modal p {
+    margin-bottom: 1em; /* Add space between paragraphs */
+    white-space: pre-wrap; /* Preserve whitespace and wrap text */
+    overflow: hidden; /* Hide overflow during typing animation */
+    min-height: 1.2em; /* Prevent collapsing */
+}
+
+/* Responsive styles for mobile */
+@media (max-width: 768px) {
+    .tick-flip, .tick-text-inline {
+        font-size: 1.5em;
+    }
+
+    .tick-label {
+        font-size: 0.8em;
+    }
+
+    .message {
+        font-size: 1.5em;
+    }
+
+    #birthday-image {
+        width: 100px;
+        height: 100px;
+    }
+
+    #birthday-message {
+        font-size: 2em;
+    }
+
+    #letter-modal {
+        width: 90%;
+        height: auto;
+        padding: 1.5em;
+    }
+
+    #letter-button {
+        font-size: 2.5em;
     }
 }
 
@@ -161,19 +256,33 @@ body {
 <div id="birthday-message" style="display: none;">Happy Birthday</div>
 <audio id="birthday-audio" src="sound.mp3"></audio>
 <div id="balloons-container"></div>
+<div id="letter-button" style="display: none;">💌</div>
+<!-- Letter modal -->
+<div id="letter-modal">
+    <span id="close-button">&times;</span>
+    <!-- Birthday wishes -->
+    <p id="letter-p1"></p>
+    <!-- Sender -->
+    <p id="letter-p2"></p>
+    <p id="letter-p3"></p>
+</div>
+
 
 
 <script>
     function handleTickInit(tick) {
 
+        // Countdown duration
         var timeDuration = Tick.helper.duration(15, 'seconds');
         var deadline = new Date( new Date().getTime() + timeDuration );
         var counter = Tick.count.down(deadline, { format: ['h' , 'm', 's'] } );
 
+        // Update the countdown timer
         counter.onupdate = function(value) {
             tick.value = value;
         };
 
+        // When the countdown ends
         counter.onended = function() {
             tick.root.style.display = 'none';
             var messageElement = document.querySelector('.message');
@@ -188,18 +297,20 @@ body {
 
                 birthdayImage.style.display = 'block';
                 
+                // Show and move up the birthday image
                 setTimeout(function() {
                     birthdayImage.classList.add('show');
                     birthdayImage.classList.add('move-up');
                 }, 100);
 
+                // Show the birthday message and play audio
                 setTimeout(function() {
                     birthdayMessage.style.display = 'block';
                     setTimeout(function() {
                         birthdayMessage.classList.add('show');
                         birthdayAudio.play();
                         
-                        // Confetti
+                        // Confetti effect
                         var end = Date.now() + (3 * 1000);
 
                         function frame() {
@@ -222,7 +333,7 @@ body {
                         }
                         frame();
 
-                        // Balloons and Emojis
+                        // Balloons and Emojis animation
                         const balloonsContainer = document.getElementById('balloons-container');
                         
                         function createBalloon() {
@@ -242,7 +353,7 @@ body {
                         }
 
                         function createRandomEmoji() {
-                            const emojis = ['🎈', '🥳', '💖', '🎉'];
+                            const emojis = ['🎈', '🥳', '❤️', '✨'];
                             const emoji = emojis[Math.floor(Math.random() * emojis.length)];
                             const element = document.createElement('span');
                             element.classList.add('balloon');
@@ -267,6 +378,11 @@ body {
                         // Create random emojis periodically
                         setInterval(createRandomEmoji, 500);
 
+                        // Show letter button after a 5-second delay
+                        setTimeout(() => {
+                            const letterButton = document.getElementById('letter-button');
+                            letterButton.style.display = 'block';
+                        }, 5000); // Show after 5 seconds
 
                     }, 100);
                 }, 1000); // Delay for the text to appear after the image starts moving
@@ -274,10 +390,55 @@ body {
             }, 2000); // 2 second delay
         };
     }
+
+    // Event listener for the letter button
+    document.getElementById('letter-button').addEventListener('click', () => {
+        document.getElementById('letter-button').style.display = 'none'; // Hide the button
+        const modal = document.getElementById('letter-modal');
+        modal.style.display = 'block';
+
+        const p1 = document.getElementById('letter-p1');
+        const p2 = document.getElementById('letter-p2');
+        const p3 = document.getElementById('letter-p3');
+        const text1 = 'Selamat ulang tahun! Semoga panjang umur, sehat selalu, dan semua keinginanmu tercapai. Teruslah menjadi pribadi yang baik dan jangan pernah menyerah. Aku selalu di sini untukmu. ';
+        const text2 = 'Dari temanmu,';
+        const text3 = '[Nama Kamu]';
+        
+        // Typing animation function
+        function typeWriter(element, text, i, callback) {
+            if (i < text.length) {
+                element.innerHTML = text.substring(0, i + 1) + '_';
+                i++;
+                setTimeout(() => typeWriter(element, text, i, callback), 50);
+            } else {
+                element.innerHTML = text;
+                if (callback) {
+                    callback();
+                }
+            }
+        }
+
+        // Start typing animation for each paragraph
+        p1.innerHTML = '';
+        p2.innerHTML = '';
+        p3.innerHTML = '';
+        typeWriter(p1, text1, 0, () => {
+            typeWriter(p2, text2, 0, () => {
+                typeWriter(p3, text3, 0);
+            });
+        });
+    });
+
+    // Event listener for the close button
+    document.getElementById('close-button').addEventListener('click', () => {
+        document.getElementById('letter-modal').style.display = 'none';
+        document.getElementById('letter-button').style.display = 'block'; // Show the letter button again
+    });
 </script>
 <script src="flip.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
+        // Remove credits
         const creditElement = document.querySelector('.tick-credits');
         if (creditElement) {
             creditElement.remove();
