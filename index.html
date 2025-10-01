@@ -39,7 +39,10 @@
 }
 
 body {
-   background-color: rgb(255, 255, 255) !important; 
+   background-image: url('bg.jpg'); 
+    background-size: cover;       /* gambar menyesuaikan ukuran div */
+    background-repeat: no-repeat; /* jangan diulang */
+    background-position: center; 
    display: flex;
    justify-content: center;
    align-items: center;
@@ -54,7 +57,8 @@ body {
 }
 
 .tick-label {
-   color: rgb(90, 93, 99) !important; 
+   color: rgb(40,40,40) !important;
+   font-weight: bold; 
 }
 
 .tick-flip-panel {
@@ -75,7 +79,9 @@ body {
 .message {
     font-size: 2em;
     margin-bottom: 1em;
-    color: rgb(90, 93, 99);
+    color: rgb(32, 32, 32);
+    text-align: center;
+    font-weight: bold;
 }
 
 #birthday-image {
@@ -89,6 +95,7 @@ body {
     transition: all 1s ease-in-out;
     opacity: 0;
     z-index: 1;
+    box-shadow: -5px 5px 5px #48484847;
 }
 
 #birthday-image.show {
@@ -106,7 +113,13 @@ body {
     margin-top: 20px;
     position: relative;
     z-index: 1;
-    color: rgb(90, 93, 99);
+    color: rgb(44, 44, 44);
+    font-weight: bold;
+    background-color: #ffffff2e;
+    padding: 15px 25px;
+    border-radius: 25px;
+    backdrop-filter: blur(10px);        /* efek blur */
+    -webkit-backdrop-filter: blur(10px); /* buat Safari/Chrome */
 }
 
 #birthday-message.show {
@@ -162,6 +175,18 @@ body {
     }
 }
 
+.countdown-container{
+    background-color: rgba(255, 255, 255, 0.25);
+    padding: 1em 2em;
+    border-radius: 1em;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    text-align: center;
+    z-index: 2;
+
+    backdrop-filter: blur(10px);        /* efek blur */
+    -webkit-backdrop-filter: blur(10px); /* buat Safari/Chrome */
+}
+
 #letter-modal {
     position: fixed;
     top: 50%;
@@ -169,13 +194,15 @@ body {
     transform: translate(-50%, -50%);
     width: 80%;
     max-width: 500px;
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.4);
     padding: 2em;
     border-radius: 1em;
     box-shadow: 0 0 20px rgba(0,0,0,0.2);
     display: none;
     z-index: 3;
-    height: 300px; /* Fixed height */
+    height: auto; /* Fixed height */
+    backdrop-filter: blur(10px);        /* efek blur */
+    -webkit-backdrop-filter: blur(10px); /* buat Safari/Chrome */
 }
 
 /* Close button for the modal */
@@ -207,6 +234,7 @@ body {
 
     .message {
         font-size: 1.5em;
+
     }
 
     #birthday-image {
@@ -219,7 +247,6 @@ body {
     }
 
     #letter-modal {
-        width: 90%;
         height: auto;
         padding: 1.5em;
     }
@@ -231,29 +258,31 @@ body {
 
 </style>
 
-<div class="message">😊 Sabar Yaa</div>
-<div class="tick" data-did-init="handleTickInit">
-
-    <div data-repeat="true" data-layout="horizontal fit" data-transform="preset(h, m, s) -> delay">
-
-        <div class="tick-group">
-
-            <div data-key="value" data-repeat="true" data-transform="pad(00) -> split -> delay">
-
-                <span data-view="flip"></span>
-
+<div class="countdown-container">
+    <div class="message">😊 Sabar Yaa</div>
+    <div class="tick" data-did-init="handleTickInit">
+    
+        <div data-repeat="true" data-layout="horizontal fit" data-transform="preset(h, m, s) -> delay">
+    
+            <div class="tick-group">
+    
+                <div data-key="value" data-repeat="true" data-transform="pad(00) -> split -> delay">
+    
+                    <span data-view="flip"></span>
+    
+                </div>
+    
+                <span data-key="label" data-view="text" class="tick-label"></span>
+    
             </div>
-
-            <span data-key="label" data-view="text" class="tick-label"></span>
-
+    
         </div>
-
+    
     </div>
-
 </div>
 
 <img id="birthday-image" src="profil.jpeg" style="display: none;">
-<div id="birthday-message" style="display: none;">Happy Birthday</div>
+<div id="birthday-message" style="display: none;">Happy Birthday!</div>
 <audio id="birthday-audio" src="sound.mp3"></audio>
 <div id="balloons-container"></div>
 <div id="letter-button" style="display: none;">💌</div>
@@ -273,7 +302,7 @@ body {
     function handleTickInit(tick) {
 
         // Countdown duration
-        var timeDuration = Tick.helper.duration(15, 'seconds');
+        var timeDuration = Tick.helper.duration(5, 'seconds');
         var deadline = new Date( new Date().getTime() + timeDuration );
         var counter = Tick.count.down(deadline, { format: ['h' , 'm', 's'] } );
 
@@ -286,10 +315,12 @@ body {
         counter.onended = function() {
             tick.root.style.display = 'none';
             var messageElement = document.querySelector('.message');
-            messageElement.innerHTML = '😊 Aku mau bilan sesuatu nih';
+            var countdownContainer = document.querySelector('.countdown-container');
+            messageElement.innerHTML = '😊 <br> Aku mau bilan sesuatu nih';
 
             setTimeout(function() {
                 messageElement.style.display = 'none';
+                countdownContainer.style.display = 'none';
 
                 var birthdayImage = document.getElementById('birthday-image');
                 var birthdayMessage = document.getElementById('birthday-message');
@@ -353,7 +384,7 @@ body {
                         }
 
                         function createRandomEmoji() {
-                            const emojis = ['🎈', '🥳', '❤️', '✨'];
+                            const emojis = ['🎈', '🥳', '💖', '🎉'];
                             const emoji = emojis[Math.floor(Math.random() * emojis.length)];
                             const element = document.createElement('span');
                             element.classList.add('balloon');
