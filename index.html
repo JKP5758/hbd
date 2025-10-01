@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link href="flip.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
     <style>
@@ -90,6 +91,7 @@ body {
     height: 150px; /* Set a height for the image */
     transition: all 1s ease-in-out;
     opacity: 0;
+    z-index: 1;
 }
 
 #birthday-image.show {
@@ -107,10 +109,29 @@ body {
     font-family: arial, sans-serif;
     color: rgb(90, 93, 99);
     margin-top: 20px;
+    position: relative;
+    z-index: 1;
 }
 
 #birthday-message.show {
     opacity: 1;
+}
+
+.balloon {
+    position: absolute;
+    bottom: -100px;
+    animation-name: fly;
+    animation-timing-function: linear;
+    z-index: 0;
+}
+
+@keyframes fly {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(-120vh);
+    }
 }
 
 </style>
@@ -138,14 +159,16 @@ body {
 
 <img id="birthday-image" src="profil.jpeg" style="display: none;">
 <div id="birthday-message" style="display: none;">Happy Birthday</div>
+<audio id="birthday-audio" src="sound.mp3"></audio>
+<div id="balloons-container"></div>
 
 
 <script>
     function handleTickInit(tick) {
 
-        var timeDuration = Tick.helper.duration(5, 'seconds');
+        var timeDuration = Tick.helper.duration(15, 'seconds');
         var deadline = new Date( new Date().getTime() + timeDuration );
-        var counter = Tick.count.down(deadline, { format: ['h' ,'m', 's'] } );
+        var counter = Tick.count.down(deadline, { format: ['h' , 'm', 's'] } );
 
         counter.onupdate = function(value) {
             tick.value = value;
@@ -161,6 +184,7 @@ body {
 
                 var birthdayImage = document.getElementById('birthday-image');
                 var birthdayMessage = document.getElementById('birthday-message');
+                var birthdayAudio = document.getElementById('birthday-audio');
 
                 birthdayImage.style.display = 'block';
                 
@@ -173,6 +197,77 @@ body {
                     birthdayMessage.style.display = 'block';
                     setTimeout(function() {
                         birthdayMessage.classList.add('show');
+                        birthdayAudio.play();
+                        
+                        // Confetti
+                        var end = Date.now() + (3 * 1000);
+
+                        function frame() {
+                            confetti({
+                                particleCount: 2,
+                                angle: 60,
+                                spread: 55,
+                                origin: { x: 0, y: 1 },
+                            });
+                            confetti({
+                                particleCount: 2,
+                                angle: 120,
+                                spread: 55,
+                                origin: { x: 1, y: 1 },
+                            });
+
+                            if (Date.now() < end) {
+                                requestAnimationFrame(frame);
+                            }
+                        }
+                        frame();
+
+                        // Balloons and Emojis
+                        const balloonsContainer = document.getElementById('balloons-container');
+                        
+                        function createBalloon() {
+                            const balloon = document.createElement('span');
+                            balloon.classList.add('balloon');
+                            balloon.innerHTML = '🎈';
+                            balloon.style.left = Math.random() * 100 + 'vw';
+                            balloon.style.fontSize = Math.random() * 2 + 1 + 'em';
+                            const animationDuration = Math.random() * 5 + 5;
+                            balloon.style.animationDuration = animationDuration + 's';
+
+                            balloon.addEventListener('animationend', () => {
+                                balloon.remove();
+                            });
+
+                            balloonsContainer.appendChild(balloon);
+                        }
+
+                        function createRandomEmoji() {
+                            const emojis = ['🎈', '🥳', '💖', '🎉'];
+                            const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+                            const element = document.createElement('span');
+                            element.classList.add('balloon');
+                            element.innerHTML = emoji;
+                            element.style.left = Math.random() * 100 + 'vw';
+                            element.style.fontSize = Math.random() * 2 + 1 + 'em';
+                            const animationDuration = Math.random() * 5 + 5;
+                            element.style.animationDuration = animationDuration + 's';
+
+                            element.addEventListener('animationend', () => {
+                                element.remove();
+                            });
+
+                            balloonsContainer.appendChild(element);
+                        }
+
+                        // Initial burst of balloons
+                        for (let i = 0; i < 30; i++) {
+                            createBalloon();
+                        }
+
+                        // Create random emojis periodically
+                        setInterval(createRandomEmoji, 500);
+
+
                     }, 100);
                 }, 1000); // Delay for the text to appear after the image starts moving
 
